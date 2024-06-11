@@ -414,9 +414,10 @@ object Smithy4sCodegenPlugin extends AutoPlugin {
       (conf / smithy4sAllowedNamespaces).?.value.map(_.toSet)
     val excludedNamespaces =
       (conf / smithy4sExcludedNamespaces).?.value.map(_.toSet)
-    val localJars =
+    val allLocalJars =
       (conf / smithy4sAllDependenciesAsJars).value.toList.sorted
         .map(p => os.Path(p))
+    val relevantLocalJars = LocalJarsFilter.containsSmithyModel(allLocalJars)
     val res =
       (conf / resolvers).value.toList.collect { case m: MavenRepository =>
         m.root
@@ -446,7 +447,7 @@ object Smithy4sCodegenPlugin extends AutoPlugin {
       repositories = res,
       dependencies = List.empty,
       transformers = transforms,
-      localJars = localJars,
+      localJars = relevantLocalJars,
       smithyBuild = smithyBuildValue
     )
 
